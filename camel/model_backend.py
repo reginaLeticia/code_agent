@@ -13,6 +13,7 @@
 # =========== Copyright 2023 @ CAMEL-AI.org. All Rights Reserved. ===========
 from abc import ABC, abstractmethod
 from typing import Any, Dict
+import requests
 
 import openai
 import tiktoken
@@ -20,8 +21,8 @@ import tiktoken
 from camel.typing import ModelType
 # from chatdev.statistics import prompt_cost
 # from chatdev.utils import log_and_print_online
-from codeagent.statistics import prompt_cost
-from codeagent.utils import log_and_print_online
+#from codeagent.statistics import prompt_cost
+#from codeagent.utils import log_and_print_online
 
 
 class ModelBackend(ABC):
@@ -75,19 +76,60 @@ class OpenAIModel(ModelBackend):
         except AttributeError:
             response = openai.chat.completions.create(*args, **kwargs, model=self.model_type.value, **self.model_config_dict)
 
-        cost = prompt_cost(
-                self.model_type.value, 
-                num_prompt_tokens=response["usage"]["prompt_tokens"], 
-                num_completion_tokens=response["usage"]["completion_tokens"]
-        )
+        #cost = prompt_cost(
+        #        self.model_type.value, 
+        #        num_prompt_tokens=response["usage"]["prompt_tokens"], 
+        #        num_completion_tokens=response["usage"]["completion_tokens"]
+        #)
 
-        log_and_print_online(
-            "**[OpenAI_Usage_Info Receive]**\nprompt_tokens: {}\ncompletion_tokens: {}\ntotal_tokens: {}\ncost: ${:.6f}\n".format(
-                response["usage"]["prompt_tokens"], response["usage"]["completion_tokens"],
-                response["usage"]["total_tokens"], cost))
-        if not isinstance(response, Dict):
+        #log_and_print_online(
+        #    "**[OpenAI_Usage_Info Receive]**\nprompt_tokens: {}\ncompletion_tokens: {}\ntotal_tokens: {}\ncost: ${:.6f}\n".format(
+        #        response["usage"]["prompt_tokens"], response["usage"]["completion_tokens"],
+        #        response["usage"]["total_tokens"], cost))
+        if not isinstance(response, dict):
             raise RuntimeError("Unexpected return from OpenAI API")
         return response
+
+class OllamaModel(ModelBackend):
+    """Ollama local LLM via HTTP API."""
+
+    def __init__(self, model_type: ModelType, model_config_dict: Dict) -> None:
+        super().__init__()
+        self.model_type = model_type
+        self.model_config_dict = model_config_dict
+
+    def run(self, *args, **kwargs) -> Dict[str, Any]:
+        # Extrai o prompt de mensagens estilo OpenAI
+        prompt = "\n".join([msg["content"] for msg in kwargs["messages"]])
+        
+        payload = {
+            "model": self.model_type.value,  # Ex: "codellama"
+            "prompt": prompt,
+            "stream": False
+        }
+
+        response = requests.post("http://localhost:11434/api/generate", json=payload)
+        response.raise_for_status()
+        result = response.json()
+
+        # Adapta para o formato OpenAI
+        return {
+            "id": "ollama_response_id",
+            "usage": {
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "total_tokens": 0
+            },  # Ollama não retorna isso
+            "choices": [
+                {
+                    "finish_reason": "stop",
+                    "message": {
+                        "role": "assistant",
+                        "content": result["response"]
+                    }
+                }
+            ]
+        }
 
 
 class StubModel(ModelBackend):
@@ -127,6 +169,8 @@ class ModelFactory:
             model_class = OpenAIModel
         elif model_type == ModelType.STUB:
             model_class = StubModel
+        elif model_type == ModelType.CODELLAMA:
+            model_class = OllamaModel
         else:
             raise ValueError("Unknown model")
 

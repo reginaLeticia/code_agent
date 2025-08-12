@@ -87,6 +87,9 @@ def num_tokens_from_messages(
         ModelType.STUB
     }:
         return count_tokens_openai_chat_models(messages, encoding)
+    elif model == ModelType.CODELLAMA:
+    # Estimativa simples baseada em palavras
+        return sum(len(msg["content"].split()) for msg in messages)
     else:
         raise NotImplementedError(
             f"`num_tokens_from_messages`` is not presently implemented "
@@ -115,6 +118,8 @@ def get_model_token_limit(model: ModelType) -> int:
         return 32768
     elif model == ModelType.STUB:
         return 4096
+    elif model == ModelType.CODELLAMA:
+        return 4096 
     else:
         raise ValueError("Unknown model type")
 
@@ -218,3 +223,9 @@ def download_tasks(task: TaskType, folder_path: str) -> None:
 
     # Delete the zip file
     os.remove(zip_file_path)
+
+def log_arguments(func):
+    return func
+
+def log_and_print_online(msg):
+    print(msg)

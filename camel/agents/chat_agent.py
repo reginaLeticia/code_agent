@@ -154,7 +154,7 @@ class ChatAgent(BaseAgent):
         return self.stored_messages
 
     @retry(wait=wait_exponential(min=5, max=60), stop=stop_after_attempt(5))
-    @openai_api_key_required
+    #@openai_api_key_required
     def step(
             self,
             input_message: ChatMessage,
