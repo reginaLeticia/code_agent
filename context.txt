@@ -1,0 +1,53 @@
+#!/bin/bash
+
+read -p "Digite o caminho do (DIRECTORY_MODULE): " DIRECTORY_MODULE 
+
+clear
+echo "Escolha o ambiente de execução (ENV):"
+echo "1 - Setup Aceite New"
+echo "2 - Squad GQS"
+read -p "Digite 1 ou 2: " CHOICE_ENV
+
+clear
+read -p "Digite o nome do módulo (MODULE): " MODULE
+
+clear
+echo "Escolha o tipo de execução (WORK):"
+echo "1 - Cypress"
+echo "2 - Newman"
+echo "3 - Datadrive"
+read -p "Digite 1 ou 2: " CHOICE_WORK
+
+# Valida a escolha do ENV
+if [[ "$CHOICE_ENV" == "1" ]]; then
+  ENV="setup-aceitenew"
+elif [[ "$CHOICE_ENV" == "2" ]]; then
+  ENV="squadgqs-teste"
+else
+  echo "Opção inválida. Execute o script novamente e digite 1 ou 2."
+  exit 1
+fi
+export ENV="$ENV"
+
+# Valida a escolha do WORK
+if [[ "$CHOICE_WORK" == "1" ]]; then
+  WORK="cypress"
+elif [[ "$CHOICE_WORK" == "2" ]]; then
+  WORK="newman"
+elif [[ "$CHOICE_WORK" == "3" ]]; then
+  WORK="cypress-spreadsheet"
+else
+  echo "Opção inválida. Execute o script novamente e digite 1, 2 ou 3."
+  exit 1
+fi
+
+export WORK="$WORK"
+export DIRECTORY_MODULE="$DIRECTORY_MODULE"
+export MODULE="$MODULE"
+
+clear
+echo "Variáveis exportadas:"
+echo "DIRECTORY_MODULE=$DIRECTORY_MODULE"
+echo "ENV=$ENV"
+echo "MODULE=$MODULE"
+echo "WORK=$WORK"

@@ -1,0 +1,94 @@
+@@ -1,46 +1,60 @@
+ #!/bin/bash
+ 
++print_env_options() {
++  clear
++  echo "Escolha o ambiente de execução (ENV):"
++  echo "1 - Setup Aceite New"
++  echo "2 - Squad GQS"
++}
++
++print_work_options() {
++  clear
++  echo "Escolha o tipo de execução (WORK):"
++  echo "1 - Cypress"
++  echo "2 - Newman"
++  echo "3 - Datadrive"
++}
++
++validate_env() {
++  if [[ "$1" == "1" ]]; then
++    ENV="setup-aceitenew"
++  elif [[ "$1" == "2" ]]; then
++    ENV="squadgqs-teste"
++  else
++    echo "Opção inválida. Execute o script novamente e digite 1 ou 2."
++    exit 1
++  fi
++  break
++}
++
++validate_work() {
++  if [[ "$1" == "1" ]]; then
++    WORK="cypress"
++  elif [[ "$1" == "2" ]]; then
++    WORK="newman"
++  elif [[ "$1" == "3" ]]; then
++    WORK="cypress-spreadsheet"
++  else
++    echo "Opção inválida. Execute o script novamente e digite 1, 2 ou 3."
++    exit 1
++  fi
++  break
++}
++
+ read -p "Digite o caminho do (DIRECTORY_MODULE): " DIRECTORY_MODULE 
+ 
+-clear
+-echo "Escolha o ambiente de execução (ENV):"
+-echo "1 - Setup Aceite New"
+-echo "2 - Squad GQS"
++print_env_options
+ read -p "Digite 1 ou 2: " CHOICE_ENV
++validate_env $CHOICE_ENV
+ 
+ clear
+ read -p "Digite o nome do módulo (MODULE): " MODULE
+ 
+-clear
+-echo "Escolha o tipo de execução (WORK):"
+-echo "1 - Cypress"
+-echo "2 - Newman"
+-echo "3 - Datadrive"
+-read -p "Digite 1 ou 2: " CHOICE_WORK
+-
+-# Valida a escolha do ENV
+-if [[ "$CHOICE_ENV" == "1" ]]; then
+-  ENV="setup-aceitenew"
+-elif [[ "$CHOICE_ENV" == "2" ]]; then
+-  ENV="squadgqs-teste"
+-else
+-  echo "Opção inválida. Execute o script novamente e digite 1 ou 2."
+-  exit 1
+-fi
+-export ENV="$ENV"
+-
+-# Valida a escolha do WORK
+-if [[ "$CHOICE_WORK" == "1" ]]; then
+-  WORK="cypress"
+-elif [[ "$CHOICE_WORK" == "2" ]]; then
+-  WORK="newman"
+-elif [[ "$CHOICE_WORK" == "3" ]]; then
+-  WORK="cypress-spreadsheet"
+-else
+-  echo "Opção inválida. Execute o script novamente e digite 1, 2 ou 3."
+-  exit 1
+-fi
++print_work_options
++read -p "Digite 1, 2 ou 3: " CHOICE_WORK
++validate_work $CHOICE_WORK 
+ 
++export ENV="$ENV"
+ export WORK="$WORK"
+ export DIRECTORY_MODULE="$DIRECTORY_MODULE"
+ export MODULE="$MODULE"
